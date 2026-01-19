@@ -9,10 +9,22 @@ export function useBookmarks() {
     return [];
   });
 
-  // Save to localStorage whenever bookmarks change
+  const [shortcuts, setShortcuts] = useState(() => {
+    if (typeof localStorage !== "undefined") {
+      const saved = localStorage.getItem("shortcuts");
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  // Save to localStorage
   useEffect(() => {
     localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
   }, [bookmarks]);
+
+  useEffect(() => {
+    localStorage.setItem("shortcuts", JSON.stringify(shortcuts));
+  }, [shortcuts]);
 
   const addBookmark = (bookmark) => {
     setBookmarks((prev) => [
@@ -21,9 +33,22 @@ export function useBookmarks() {
     ]);
   };
 
+  const addShortcut = (shortcut) => {
+    setShortcuts((prev) => [
+      ...prev,
+      { id: Date.now(), ...shortcut, addDate: Date.now() },
+    ]);
+  };
+
   const updateBookmark = (id, updatedData) => {
     setBookmarks((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, ...updatedData } : b))
+      prev.map((b) => (b.id === id ? { ...b, ...updatedData } : b)),
+    );
+  };
+
+  const updateShortcut = (id, updatedData) => {
+    setShortcuts((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, ...updatedData } : s)),
     );
   };
 
@@ -31,16 +56,45 @@ export function useBookmarks() {
     setBookmarks((prev) => prev.filter((b) => b.id !== id));
   };
 
+  const deleteShortcut = (id) => {
+    setShortcuts((prev) => prev.filter((s) => s.id !== id));
+  };
+
   const importBookmarks = (newBookmarks) => {
-    setBookmarks((prev) => [...prev, ...newBookmarks]);
+    // Check if any belong to "Shortcuts" folder
+    const incomingShortcuts = newBookmarks.filter(
+      (b) => b.folder === "Shortcuts" || b.folder === "Quick Links",
+    );
+    // Also filter out Search Engines so they don't appear as bookmarks
+    const incomingRegular = newBookmarks.filter(
+      (b) =>
+        b.folder !== "Shortcuts" &&
+        b.folder !== "Quick Links" &&
+        b.folder !== "Search Engines",
+    );
+
+    setBookmarks((prev) => [...prev, ...incomingRegular]);
+    if (incomingShortcuts.length > 0) {
+      setShortcuts((prev) => [...prev, ...incomingShortcuts]);
+    }
+  };
+
+  const resetBookmarks = () => {
+    setBookmarks([]);
+    setShortcuts([]);
   };
 
   return {
     bookmarks,
+    shortcuts,
     addBookmark,
+    addShortcut,
     updateBookmark,
+    updateShortcut,
     deleteBookmark,
+    deleteShortcut,
     importBookmarks,
+    resetBookmarks,
   };
 }
 
@@ -68,7 +122,11 @@ export const parseBookmarkHTML = (html) => {
 };
 
 // Helper to generate Netscape Bookmark HTML
-export const generateBookmarkHTML = (bookmarks) => {
+export const generateBookmarkHTML = (
+  bookmarks,
+  shortcuts = [],
+  searchEngines = [],
+) => {
   const folders = [...new Set(bookmarks.map((b) => b.folder || "Bookmarks"))];
 
   let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
@@ -80,6 +138,26 @@ export const generateBookmarkHTML = (bookmarks) => {
 <H1>Bookmarks</H1>
 <DL><p>\n`;
 
+  // Shortcuts Folder
+  if (shortcuts.length > 0) {
+    html += `    <DT><H3>Shortcuts</H3>\n    <DL><p>\n`;
+    shortcuts.forEach((bookmark) => {
+      html += `        <DT><A HREF="${bookmark.url}" ADD_DATE="${bookmark.addDate}"${bookmark.icon ? ` ICON="${bookmark.icon}"` : ""}>${bookmark.title}</A>\n`;
+    });
+    html += `    </DL><p>\n`;
+  }
+
+  // Search Engines Folder
+  if (searchEngines.length > 0) {
+    html += `    <DT><H3>Search Engines</H3>\n    <DL><p>\n`;
+    searchEngines.forEach((engine) => {
+      // We act like it's a bookmark, but the URL contains the query param placeholder
+      html += `        <DT><A HREF="${engine.url}" ADD_DATE="${Date.now()}">${engine.name}</A>\n`;
+    });
+    html += `    </DL><p>\n`;
+  }
+
+  // Regular Folders
   folders.forEach((folder) => {
     html += `    <DT><H3>${folder}</H3>\n    <DL><p>\n`;
     bookmarks

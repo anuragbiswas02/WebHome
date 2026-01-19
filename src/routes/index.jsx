@@ -1,7 +1,9 @@
+import { Settings, Image } from 'lucide-react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { useBookmarks, parseBookmarkHTML, generateBookmarkHTML } from '../hooks/useBookmarks';
+import { useSearchEngines } from '../hooks/useSearchEngines';
 // import { parseBookmarkHTML, generateBookmarkHTML } from '../utils/bookmarkUtils';
 import { useWallpaper } from '../hooks/useWallpaper';
 import { Header } from '../components/Header';
@@ -11,6 +13,9 @@ import { BookmarkGrid } from '../components/BookmarkGrid';
 import { RecentBookmarks } from '../components/RecentBookmarks';
 import { BottomNav } from '../components/BottomNav';
 import { BookmarkModal } from '../components/BookmarkModal';
+import { ShortcutModal } from '../components/ShortcutModal';
+import { Clock } from '../components/Clock';
+import { Stats } from '../components/Stats';
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -19,11 +24,15 @@ export const Route = createFileRoute('/')({
 function HomePage() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const { bookmarks, addBookmark, updateBookmark, deleteBookmark, importBookmarks } = useBookmarks();
+  const { bookmarks, shortcuts, addBookmark, updateBookmark, deleteBookmark, importBookmarks, addShortcut, deleteShortcut, updateShortcut } = useBookmarks();
+  const { engines, importEngines } = useSearchEngines();
   const { wallpaper, fetchNewWallpaper, loading } = useWallpaper();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
+
+  const [isShortcutModalOpen, setIsShortcutModalOpen] = useState(false);
+  const [editingShortcut, setEditingShortcut] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedEngineId, setSelectedEngineId] = useState('google');
@@ -89,14 +98,19 @@ function HomePage() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const parsed = parseBookmarkHTML(e.target?.result);
+      const incomingEngines = parsed.filter(b => b.folder === 'Search Engines');
+
       importBookmarks(parsed);
+      if (incomingEngines.length > 0) {
+        importEngines(incomingEngines.map(e => ({ name: e.title, url: e.url })));
+      }
     };
     reader.readAsText(file);
     event.target.value = '';
   };
 
   const handleExport = () => {
-    const html = generateBookmarkHTML(bookmarks);
+    const html = generateBookmarkHTML(bookmarks, shortcuts, engines);
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -136,53 +150,99 @@ function HomePage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col pb-24 lg:pb-6 lg:pl-20 relative overflow-x-hidden transition-all duration-500 ease-in-out bg-cover bg-center bg-fixed bg-no-repeat"
+      className="min-h-screen flex flex-col relative overflow-x-hidden transition-all duration-500 ease-in-out bg-cover bg-center bg-fixed bg-no-repeat"
       style={{
         backgroundImage: activeWallpaper ? `url(${activeWallpaper})` : undefined
       }}
     >
-      {/* Overlay to ensure text readability */}
-      <div className={`absolute inset-0 z-0 pointer-events-none transition-opacity duration-300 ${activeWallpaper ? (theme === 'light' ? 'bg-bg-solid/30 backdrop-blur-[0.5px]' : 'bg-bg-solid/40 backdrop-blur-[2px]') : ''}`} />
+      <div className={`absolute inset-0 z-0 pointer-events-none transition-opacity duration-300 ${activeWallpaper ? 'bg-black/10' : ''}`} />
+
+      {/* Desktop Specific Elements */}
+      <Stats
+        theme={theme}
+        toggleTheme={toggleTheme}
+        username={username}
+      />
+
+      {/* Desktop Clock Position - Aligned with Stats (Top Right) */}
+      <div className="hidden lg:block absolute top-8 right-16 z-20">
+        <Clock theme={theme} hasWallpaper={!!activeWallpaper} />
+      </div>
+
+      {/* Desktop Bottom Controls (Wallpaper & Settings) */}
+      <div className="hidden lg:flex absolute bottom-8 right-12 z-20 gap-3">
+        {isWallpaperVisible && (
+          <button
+            onClick={fetchNewWallpaper}
+            className="p-2.5 rounded-xl bg-bg-card/30 backdrop-blur-md text-white border border-white/10 hover:bg-white/20 transition-all shadow-float hover:shadow-lg group"
+            title="Shuffle Wallpaper"
+          >
+            <Image className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          </button>
+        )}
+
+        <button
+          onClick={() => navigate({ to: '/settings' })}
+          className="p-2.5 rounded-xl bg-bg-card/30 backdrop-blur-md text-white border border-white/10 hover:bg-white/20 transition-all shadow-float hover:shadow-lg group"
+          title="Settings"
+        >
+          <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
+        </button>
+      </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Header
-          theme={theme}
-          toggleTheme={toggleTheme}
-          onRefreshWallpaper={fetchNewWallpaper}
-          toggleWallpaperVisibility={toggleWallpaperVisibility}
-          isWallpaperVisible={isWallpaperVisible}
-          username={username}
-          onOpenSettings={() => navigate({ to: '/settings' })}
-        />
+        {/* Header - Repositioned for Desktop to Bottom Right or Minimal */}
+        <div className="lg:hidden">
+          <Header
+            theme={theme}
+            toggleTheme={toggleTheme}
+            onRefreshWallpaper={fetchNewWallpaper}
+            toggleWallpaperVisibility={toggleWallpaperVisibility}
+            isWallpaperVisible={isWallpaperVisible}
+            username={username}
+            onOpenSettings={() => navigate({ to: '/settings' })}
+          />
+        </div>
 
-        {/* <section className="px-5 pb-4 lg:px-12 lg:pb-3">
-          <h1 className="text-2xl lg:text-3xl font-bold leading-snug text-text-primary max-w-7xl mx-auto">
-            Your WebHome
-          </h1>
-        </section> */}
+        {/* Mobile Clock (Original Position) */}
+        <div className="lg:hidden">
+          <Clock theme={theme} hasWallpaper={!!activeWallpaper} />
+        </div>
 
-        <SearchSection
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          activeFilter={activeFilter}
-          setActiveFilter={setActiveFilter}
-          folders={folders}
-          bookmarksCount={bookmarks.length}
-          selectedEngineId={selectedEngineId}
-          setSelectedEngineId={setSelectedEngineId}
-          hasWallpaper={!!activeWallpaper}
-        />
+        <main className="flex-1 flex flex-col items-center justify-center w-full px-5 lg:px-12 pt-10 pb-20 lg:py-0">
 
-        <MobileFilterSection
-          activeFilter={activeFilter}
-          setActiveFilter={setActiveFilter}
-          folders={folders}
-          bookmarksCount={bookmarks.length}
-        />
+          <div className="w-full max-w-4xl mx-auto space-y-8 lg:space-y-12">
+            <SearchSection
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              activeFilter={activeFilter}
+              setActiveFilter={setActiveFilter}
+              folders={folders}
+              bookmarksCount={bookmarks.length}
+              selectedEngineId={selectedEngineId}
+              setSelectedEngineId={setSelectedEngineId}
+              hasWallpaper={!!activeWallpaper}
+              shortcuts={shortcuts}
+              engines={engines}
+              onAddShortcut={() => {
+                setEditingShortcut(null);
+                setIsShortcutModalOpen(true);
+              }}
+              onDeleteShortcut={deleteShortcut}
+              onEditShortcut={(shortcut) => {
+                setEditingShortcut(shortcut);
+                setIsShortcutModalOpen(true);
+              }}
+            />
 
-        <main className="flex-1 px-5 lg:px-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:grid lg:grid-cols-[1fr_280px] gap-5 lg:gap-8">
+            <MobileFilterSection
+              activeFilter={activeFilter}
+              setActiveFilter={setActiveFilter}
+              folders={folders}
+              bookmarksCount={bookmarks.length}
+            />
+
+            <div className="bg-bg-card/30 backdrop-blur-md rounded-3xl p-6 lg:p-8 border border-white/10 shadow-float">
               <BookmarkGrid
                 bookmarks={bookmarks}
                 groupedBookmarks={groupedBookmarks}
@@ -193,16 +253,13 @@ function HomePage() {
                 onAdd={openAddModal}
                 onImport={handleImport}
               />
-
-              {filteredBookmarks.length > 0 && (
-                <RecentBookmarks recentBookmarks={filteredBookmarks.slice(0, 6)} />
-              )}
             </div>
+
+            {filteredBookmarks.length > 0 && (
+              <RecentBookmarks recentBookmarks={filteredBookmarks.slice(0, 6)} />
+            )}
           </div>
         </main>
-
-        {/* <BottomNav onAdd={openAddModal} /> */}
-        {/* <BottomNav onAdd={openAddModal} /> */}
 
         <BookmarkModal
           isOpen={isModalOpen}
@@ -210,6 +267,19 @@ function HomePage() {
           onSave={handleSaveBookmark}
           initialData={editingBookmark}
           availableFolders={[...new Set(bookmarks.map((b) => b.folder).filter(Boolean))]}
+        />
+
+        <ShortcutModal
+          isOpen={isShortcutModalOpen}
+          onClose={() => setIsShortcutModalOpen(false)}
+          onSave={(data) => {
+            if (editingShortcut) {
+              updateShortcut(editingShortcut.id, data);
+            } else {
+              addShortcut(data);
+            }
+          }}
+          initialData={editingShortcut}
         />
 
       </div>

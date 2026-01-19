@@ -1,4 +1,5 @@
-import { Moon, Sun, Image, Eye, EyeOff } from 'lucide-react';
+import { Moon, Sun, Image, Eye, EyeOff, Menu, X, Settings } from 'lucide-react';
+import { useState } from 'react';
 
 export function Header({
     theme,
@@ -9,59 +10,75 @@ export function Header({
     username,
     onOpenSettings
 }) {
-    const getGreeting = () => {
-        const hour = new Date().getHours();
-        if (hour < 12) return 'Good Morning';
-        if (hour < 17) return 'Good Afternoon';
-        return 'Good Evening';
-    };
+
+
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
         <header className="px-5 pt-5 pb-3 lg:px-12 lg:pt-6 lg:pb-4">
-            <div className="flex items-center justify-between max-w-7xl mx-auto">
-                <div
-                    className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={onOpenSettings}
-                    title="Open Settings"
-                >
-                    <div className="w-10 h-10 lg:w-9 lg:h-9 rounded-full gradient-orange flex items-center justify-center text-base shadow-sm">
-                        👋
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-xs text-text-secondary">{getGreeting()},</span>
-                        <span className="text-sm lg:text-base font-semibold text-text-primary">{username || 'User'}</span>
-                    </div>
-                </div>
-                <div className="flex gap-2">
+            <div className="flex items-center justify-end max-w-7xl mx-auto">
+                <div className="relative">
                     <button
-                        onClick={toggleWallpaperVisibility}
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 ${isWallpaperVisible ? 'bg-primary-orange text-white' : 'bg-bg-card text-text-primary'}`}
-                        title={isWallpaperVisible ? "Hide Wallpaper" : "Show Wallpaper"}
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className="w-10 h-10 rounded-xl bg-bg-card flex items-center justify-center shadow-sm hover:shadow-md transition-all active:scale-95"
                     >
-                        {isWallpaperVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        {isMenuOpen ? <X className="w-5 h-5 text-text-primary" /> : <Menu className="w-5 h-5 text-text-primary" />}
                     </button>
 
-                    {isWallpaperVisible && (
-                        <button
-                            onClick={onRefreshWallpaper}
-                            className="w-9 h-9 rounded-xl bg-bg-card flex items-center justify-center shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
-                            title="Shuffle Wallpaper"
-                        >
-                            <Image className="w-4 h-4 text-text-primary" />
-                        </button>
+                    {/* Dropdown Menu */}
+                    {isMenuOpen && (
+                        <div className="absolute right-0 top-12 flex flex-col gap-2 p-2 bg-bg-card rounded-2xl shadow-float border border-gray-100/50 animate-in fade-in slide-in-from-top-2 z-50 min-w-12">
+                            <button
+                                onClick={() => {
+                                    onOpenSettings();
+                                    setIsMenuOpen(false);
+                                }}
+                                className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-bg-input text-text-primary transition-colors"
+                                title="Settings"
+                            >
+                                <Settings className="w-5 h-5" />
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    toggleWallpaperVisibility();
+                                    setIsMenuOpen(false);
+                                }}
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isWallpaperVisible ? 'bg-primary-orange text-white shadow-orange' : 'hover:bg-bg-input text-text-primary'}`}
+                                title={isWallpaperVisible ? "Hide Wallpaper" : "Show Wallpaper"}
+                            >
+                                {isWallpaperVisible ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                            </button>
+
+                            {isWallpaperVisible && (
+                                <button
+                                    onClick={() => {
+                                        onRefreshWallpaper();
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-bg-input text-text-primary transition-colors"
+                                    title="Shuffle Wallpaper"
+                                >
+                                    <Image className="w-5 h-5" />
+                                </button>
+                            )}
+
+                            <button
+                                onClick={() => {
+                                    toggleTheme();
+                                    setIsMenuOpen(false);
+                                }}
+                                className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-bg-input text-text-primary transition-colors"
+                                title="Toggle Theme"
+                            >
+                                {theme === 'light' ? (
+                                    <Moon className="w-5 h-5" />
+                                ) : (
+                                    <Sun className="w-5 h-5" />
+                                )}
+                            </button>
+                        </div>
                     )}
-
-                    <button
-                        onClick={toggleTheme}
-                        className="w-9 h-9 rounded-xl bg-bg-card flex items-center justify-center shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
-                        title="Toggle Theme"
-                    >
-                        {theme === 'light' ? (
-                            <Moon className="w-4 h-4 text-text-primary" />
-                        ) : (
-                            <Sun className="w-4 h-4 text-text-primary" />
-                        )}
-                    </button>
                 </div>
             </div>
         </header>

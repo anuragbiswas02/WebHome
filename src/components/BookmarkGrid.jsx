@@ -76,13 +76,41 @@ export function BookmarkGrid({
                                 </span>
                             </div>
 
-                            <button
-                                onClick={(e) => toggleView(folder, e)}
-                                className="p-1.5 rounded-lg hover:bg-bg-input text-text-secondary transition-colors"
-                                title={currentView === 'grid' ? "Switch to List View" : "Switch to Grid View"}
-                            >
-                                {currentView === 'grid' ? <List className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (window.confirm(`Open all ${items.length} bookmarks in "${folder}"?`)) {
+                                            items.forEach(bookmark => window.open(bookmark.url, '_blank'));
+                                        }
+                                    }}
+                                    className="p-1.5 rounded-lg hover:bg-bg-input text-text-secondary transition-colors"
+                                    title="Open All Bookmarks"
+                                >
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="w-4 h-4"
+                                    >
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                        <polyline points="15 3 21 3 21 9" />
+                                        <line x1="10" y1="14" x2="21" y2="3" />
+                                    </svg>
+                                </button>
+                                <button
+                                    onClick={(e) => toggleView(folder, e)}
+                                    className="p-1.5 rounded-lg hover:bg-bg-input text-text-secondary transition-colors"
+                                    title={currentView === 'grid' ? "Switch to List View" : "Switch to Grid View"}
+                                >
+                                    {currentView === 'grid' ? <List className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
+                                </button>
+                            </div>
                         </div>
 
                         {expandedFolders[folder] && (
@@ -94,7 +122,7 @@ export function BookmarkGrid({
                                     <div
                                         key={bookmark.id}
                                         className={`relative rounded-xl transition-all overflow-hidden group ${currentView === 'grid'
-                                            ? `flex flex-col p-3 lg:p-4 min-h-25 lg:min-h-30 shadow-card hover:shadow-float hover:-translate-y-0.5 ${index % 3 === 0 ? 'bg-accent-teal' : index % 3 === 1 ? 'bg-primary-orange' : 'bg-accent-coral'
+                                            ? `flex flex-col p-3 lg:p-4 min-h-25 lg:min-h-30 shadow-float hover:-translate-y-1 hover:shadow-2xl backdrop-blur-xl border border-white/10 ${index % 3 === 0 ? 'bg-accent-teal/80' : index % 3 === 1 ? 'bg-primary-orange/80' : 'bg-accent-coral/80'
                                             }`
                                             : "flex items-center gap-3 p-3 bg-bg-card hover:bg-bg-input border border-transparent hover:border-gray-200/50 shadow-sm"
                                             }`}
