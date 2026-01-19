@@ -22,9 +22,9 @@ export function QuickLinks({ shortcuts, onAdd, onDelete, onEdit }) {
     const [activeMenu, setActiveMenu] = useState(null);
 
     return (
-        <div className="flex lg:flex-wrap overflow-x-auto lg:overflow-visible items-center lg:items-start lg:justify-center gap-4 lg:gap-8 mt-8 lg:mt-10 px-4 pb-4 lg:pb-0 no-scrollbar snap-x w-full relative z-10">
+        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-4 lg:gap-6 mt-8 lg:mt-10 px-4 lg:px-0 pb-4 lg:pb-0 w-full relative z-10">
             {shortcuts.map((shortcut) => (
-                <div key={shortcut.id} className="group relative flex flex-col items-center gap-3 w-20 lg:w-24 shrink-0 snap-center">
+                <div key={shortcut.id} className="group relative flex flex-col items-center gap-2 lg:gap-3">
                     <a
                         href={shortcut.url}
                         target="_blank"
@@ -95,13 +95,13 @@ export function QuickLinks({ shortcuts, onAdd, onDelete, onEdit }) {
 
             <button
                 onClick={onAdd}
-                className="flex flex-col items-center gap-3 w-20 lg:w-24 group shrink-0 snap-center"
+                className="flex flex-col items-center gap-2 lg:gap-3 group"
             >
-                <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-bg-card flex items-center justify-center hover:bg-bg-input transition-all shadow-sm hover:shadow-md">
-                    <Plus className="w-5 h-5 lg:w-6 lg:h-6 text-text-primary group-hover:scale-110 transition-transform" />
+                <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-bg-card flex items-center justify-center hover:bg-bg-input transition-all shadow-sm hover:shadow-md border-2 border-dashed border-gray-300 hover:border-primary-orange">
+                    <Plus className="w-5 h-5 lg:w-6 lg:h-6 text-text-secondary group-hover:text-primary-orange group-hover:scale-110 transition-all" />
                 </div>
-                <span className="text-xs lg:text-sm font-medium text-text-primary text-center truncate w-full px-1 shadow-black/20 drop-shadow-sm select-none opacity-80 group-hover:opacity-100">
-                    Add shortcut
+                <span className="text-xs font-medium text-text-secondary text-center truncate w-full px-1 select-none group-hover:text-text-primary transition-colors">
+                    Add
                 </span>
             </button>
         </div>

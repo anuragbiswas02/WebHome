@@ -37,6 +37,7 @@ function HomePage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedEngineId, setSelectedEngineId] = useState('google');
   const [expandedFolders, setExpandedFolders] = useState({});
+  const [showFilters, setShowFilters] = useState(false);
 
   // Username State
   const [username, setUsername] = useState(() => {
@@ -235,14 +236,65 @@ function HomePage() {
               }}
             />
 
-            <MobileFilterSection
-              activeFilter={activeFilter}
-              setActiveFilter={setActiveFilter}
-              folders={folders}
-              bookmarksCount={bookmarks.length}
-            />
+            {/* Bookmarks Section */}
+            <div className="bg-bg-card/30 backdrop-blur-md rounded-3xl p-5 lg:p-8 border border-white/10 shadow-float">
+              {/* Section Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg lg:text-xl font-bold text-text-primary">Bookmarks</h2>
+                  <span className="px-2.5 py-0.5 rounded-full bg-primary-orange/20 text-primary-orange text-xs font-semibold">
+                    {bookmarks.length}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`p-2 rounded-xl transition-all ${showFilters ? 'bg-primary-orange text-white' : 'bg-bg-input text-text-secondary hover:bg-bg-card'}`}
+                    title={showFilters ? "Hide Filters" : "Show Filters"}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={openAddModal}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-orange text-white text-sm font-semibold shadow-orange hover:shadow-lg transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span className="hidden sm:inline">Add</span>
+                  </button>
+                </div>
+              </div>
 
-            <div className="bg-bg-card/30 backdrop-blur-md rounded-3xl p-6 lg:p-8 border border-white/10 shadow-float">
+              {/* Filter Pills */}
+              {showFilters && (
+                <div className="flex overflow-x-auto gap-2 pb-4 no-scrollbar snap-x animate-in fade-in slide-in-from-top-2 duration-200">
+                  <button
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all shrink-0 ${activeFilter === 'all'
+                      ? 'bg-primary-orange text-white shadow-orange'
+                      : 'bg-bg-card text-text-secondary shadow-sm hover:bg-bg-input'
+                      }`}
+                    onClick={() => setActiveFilter('all')}
+                  >
+                    All <span className="opacity-75 text-xs">({bookmarks.length})</span>
+                  </button>
+                  {folders.map((folder) => (
+                    <button
+                      key={folder}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all shrink-0 ${activeFilter === folder
+                        ? 'bg-primary-orange text-white shadow-orange'
+                        : 'bg-bg-card text-text-secondary shadow-sm hover:bg-bg-input'
+                        }`}
+                      onClick={() => setActiveFilter(folder)}
+                    >
+                      {folder}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <BookmarkGrid
                 bookmarks={bookmarks}
                 groupedBookmarks={groupedBookmarks}
