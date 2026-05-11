@@ -86,6 +86,80 @@
   }
 }
 
+/* Animation keyframes */
+@keyframes wh-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes wh-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wh-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wh-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes wh-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(8px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.02) translateY(0);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes wh-sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wh-spin-once {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Custom utilities */
 @layer utilities {
   .gradient-warm {
@@ -116,14 +190,69 @@
     box-shadow: 0 4px 15px rgba(245, 166, 35, 0.4);
   }
 
-  /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-
-  /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Named entrance animations */
+  .anim-fade-in {
+    animation: wh-fade-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .anim-slide-up {
+    animation: wh-slide-up 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .anim-slide-down {
+    animation: wh-slide-down 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .anim-scale-in {
+    animation: wh-scale-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .anim-pop {
+    animation: wh-pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .anim-sheet-up {
+    animation: wh-sheet-up 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .anim-backdrop {
+    animation: wh-fade-in 180ms ease-out both;
+  }
+
+  /* Stagger helpers — use with .anim-slide-up for cascading entrance */
+  .anim-delay-1 {
+    animation-delay: 60ms;
+  }
+  .anim-delay-2 {
+    animation-delay: 120ms;
+  }
+  .anim-delay-3 {
+    animation-delay: 180ms;
+  }
+  .anim-delay-4 {
+    animation-delay: 240ms;
+  }
+  .anim-delay-5 {
+    animation-delay: 300ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .anim-fade-in,
+    .anim-slide-up,
+    .anim-slide-down,
+    .anim-scale-in,
+    .anim-pop,
+    .anim-sheet-up,
+    .anim-backdrop {
+      animation: none !important;
+    }
   }
 }

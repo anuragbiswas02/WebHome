@@ -104,6 +104,7 @@ export function SearchSection({
                             <Search className="w-5 h-5 text-gray-400 ml-2" />
                             <input
                                 type="text"
+                                data-search-input="true"
                                 placeholder={`Search ${currentEngine?.name} or type a URL`}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -112,12 +113,31 @@ export function SearchSection({
                                 autoFocus
                             />
 
-                            {/* Right Icons (Microphone / Lens placeholders) */}
-                            <div className="flex items-center gap-3 pr-6 pl-2">
-                                <button className="p-2 text-gray-500 hover:text-blue-500 hover:bg-gray-100 rounded-full transition-colors" title="Voice Search (Demo)">
+                            {/* Right Icons */}
+                            <div className="flex items-center gap-2 pr-4 pl-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const evt = new CustomEvent('webhome:open-palette');
+                                        window.dispatchEvent(evt);
+                                    }}
+                                    className="hidden sm:flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                                    title="Open command palette (⌘K)"
+                                >
+                                    <span className="hidden md:inline">⌘</span>K
+                                </button>
+                                <button
+                                    type="button"
+                                    className="p-2 text-gray-500 hover:text-blue-500 hover:bg-gray-100 rounded-full transition-colors"
+                                    title="Voice Search (Demo)"
+                                >
                                     <Mic className="w-5 h-5" />
                                 </button>
-                                <button className="p-2 text-gray-500 hover:text-blue-500 hover:bg-gray-100 rounded-full transition-colors" title="Lens (Demo)">
+                                <button
+                                    type="button"
+                                    className="p-2 text-gray-500 hover:text-blue-500 hover:bg-gray-100 rounded-full transition-colors"
+                                    title="Lens (Demo)"
+                                >
                                     <Camera className="w-5 h-5" />
                                 </button>
                             </div>

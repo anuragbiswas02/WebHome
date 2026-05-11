@@ -43,11 +43,11 @@ export function ShortcutModal({ isOpen, onClose, onSave, initialData }) {
 
     return (
         <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-[100] backdrop-blur-sm"
+            className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-[100] backdrop-blur-sm anim-backdrop"
             onClick={onClose}
         >
             <div
-                className="w-full max-w-sm bg-bg-card rounded-2xl shadow-float animate-in fade-in zoom-in-95 duration-200"
+                className="w-full max-w-sm bg-bg-card rounded-2xl shadow-float anim-pop"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between p-4 border-b border-gray-100/10">

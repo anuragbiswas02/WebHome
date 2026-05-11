@@ -1,35 +1,47 @@
 import { useState, useEffect } from 'react';
 
-export function Clock({ theme, hasWallpaper }) {
+export function Clock({ hasWallpaper }) {
     const [time, setTime] = useState(new Date());
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setTime(new Date());
-        }, 1000);
+        const timer = setInterval(() => setTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
-    const formatTime = (date) => {
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    };
+    const parts = time
+        .toLocaleTimeString([], {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        })
+        .split(' ');
+    const clock = parts[0]; // "8:30"
+    const meridiem = (parts[1] || '').toUpperCase(); // "AM" / "PM"
 
-    const formatDate = (date) => {
-        return date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
-    };
+    const dateStr = time.toLocaleDateString([], {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+    });
 
-    // Determine text color class based on context
-    // If wallpaper is active, use white text with drop shadow for readability
-    // If no wallpaper, use standard text color
     const textColorClass = hasWallpaper ? 'text-white drop-shadow-lg' : 'text-text-primary';
 
     return (
-        <div className="flex flex-col items-center justify-center py-8 select-none">
-            <h1 className={`text-6xl lg:text-8xl font-bold tracking-tight mb-2 transition-colors duration-300 ${textColorClass}`}>
-                {formatTime(time)}
+        <div className="flex flex-col items-center justify-center py-8 select-none anim-fade-in">
+            <h1
+                className={`text-6xl lg:text-8xl font-bold tracking-tight mb-2 transition-colors duration-300 flex items-end justify-center gap-3 ${textColorClass}`}
+            >
+                <span className="tabular-nums">{clock}</span>
+                <span
+                    className={`text-xl lg:text-3xl font-semibold mb-2 lg:mb-3 opacity-80 ${textColorClass}`}
+                >
+                    {meridiem}
+                </span>
             </h1>
-            <p className={`text-lg lg:text-2xl font-medium opacity-90 transition-colors duration-300 ${textColorClass}`}>
-                {formatDate(time)}
+            <p
+                className={`text-lg lg:text-2xl font-medium opacity-90 transition-colors duration-300 ${textColorClass}`}
+            >
+                {dateStr}
             </p>
         </div>
     );
